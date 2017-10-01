@@ -66,6 +66,7 @@ frappe.ready(function() {
 	// if changed, set dirty flag
 	$form.on('change', function() {
 		frappe.form_dirty = true;
+		apply_depends_on();
 	});
 
 	$form.on('submit', function() {
@@ -424,6 +425,11 @@ frappe.ready(function() {
 
 	};
 	setup_text_editor();
+
+	function apply_depends_on() {
+		//on change of any control, reevaluate depends on for all controls in visible page.
+
+	}
 });
 
 frappe.summer_note_icons = {

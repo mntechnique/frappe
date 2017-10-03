@@ -483,3 +483,8 @@ def make_route_string(parameters):
 				route_string += route_string + delimeter + key + "=" + cstr(parameters[key])
 				delimeter = '&'
 	return (route_string, delimeter)
+
+@frappe.whitelist(allow_guest=True)
+def get_web_form_fields(web_form):
+	web_form_fields = frappe.get_all("Web Form Field", filters={"parent":web_form}, fields=["name", "depends_on", "fieldname", "fieldtype"])
+	return web_form_fields

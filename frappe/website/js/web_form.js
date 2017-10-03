@@ -1,4 +1,5 @@
 frappe.ready(function() {
+
 	frappe.file_reading = false;
 	frappe.form_dirty = false;
 
@@ -8,6 +9,23 @@ frappe.ready(function() {
 	$('[data-toggle="tooltip"]').tooltip();
 
 	var $form = $("form[data-web-form='"+frappe.web_form_name+"']");
+
+	//Retrieve web_form_fields and store in local storage.
+	frappe.call({
+		type: "GET",
+		method: "frappe.website.doctype.web_form.web_form.get_web_form_fields",
+		args: {
+			web_form: frappe.web_form_name
+		},
+		freeze: true,
+		callback: function(data) {
+			if(!data.exc) {	
+				localStorage.setItem('web_form_fields', JSON.stringify(data.message));
+			} else {
+				frappe.msgprint(__('There were errors. Please report this.'));
+			}
+		}
+	});
 
 	// read file attachment
 	$form.on("change", "[type='file']", function() {
@@ -428,8 +446,55 @@ frappe.ready(function() {
 
 	function apply_depends_on() {
 		//on change of any control, reevaluate depends on for all controls in visible page.
+		web_form_fields = JSON.parse(window.localStorage['web_form_fields']);
 
+		var fields_with_depends_on = $.grep(web_form_fields, function(web_form_field) {
+			return ([null, undefined, ""].indexOf(web_form_field.depends_on) == -1);
+		});
+
+		console.log("fields with depends on",fields_with_depends_on);
+		
+		$.each(fields_with_depends_on, function(index, web_form_field) {
+			if (web_form_field) {
+				console.log("web_form_field", web_form_field);
+				// var selector_name = web_form_field.name || web_form_field.attr("data-fieldname") || web_form_field.attr("id");
+
+				// console.log("selector_name",selector_name);
+				var depends_on_result = evaluate_depends_on(web_form_field.depends_on);
+				//var field_element = $("#" + (web_form_field.fieldname ? web_form_field.fieldname : web_form_field.name));
+				var field_element = $("[data-fieldname='" + web_form_field.name +  "']");
+
+				if (web_form_field.fieldtype == "Section Break") {
+					if (depends_on_result == false) {
+						field_element.addClass("hidden");
+					} else {
+						field_element.removeClass("hidden");
+					}
+				} else {
+					if (depends_on_result == false) {
+						field_element.parent().addClass("hidden");
+					} else {
+						console.log("Field", field_element);
+						console.log("Parent", field_element.parent());
+						field_element.parent().removeClass("hidden");
+					}
+				}
+			}
+		});
 	}
+
+	var evaluate_depends_on = function(expression) {
+		var out = null;
+		if(expression.substr(0,5)=='eval:') {
+			try {
+				out = eval(expression.substr(5));
+			} catch(e) {
+				console.log("invalid dom expression", e);
+			}
+		}
+		return out;
+	}
+	apply_depends_on();
 });
 
 frappe.summer_note_icons = {

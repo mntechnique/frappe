@@ -452,17 +452,13 @@ frappe.ready(function() {
 			return ([null, undefined, ""].indexOf(web_form_field.depends_on) == -1);
 		});
 
-		console.log("fields with depends on",fields_with_depends_on);
-		
 		$.each(fields_with_depends_on, function(index, web_form_field) {
 			if (web_form_field) {
-				console.log("web_form_field", web_form_field);
-				// var selector_name = web_form_field.name || web_form_field.attr("data-fieldname") || web_form_field.attr("id");
-
-				// console.log("selector_name",selector_name);
 				var depends_on_result = evaluate_depends_on(web_form_field.depends_on);
-				//var field_element = $("#" + (web_form_field.fieldname ? web_form_field.fieldname : web_form_field.name));
-				var field_element = $("[data-fieldname='" + web_form_field.name +  "']");
+				
+				var name = (web_form_field.fieldname || web_form_field.name);
+				var selector = "[data-fieldname='" + name +  "']";
+				var field_element = $(selector);
 
 				if (web_form_field.fieldtype == "Section Break") {
 					if (depends_on_result == false) {
@@ -472,11 +468,9 @@ frappe.ready(function() {
 					}
 				} else {
 					if (depends_on_result == false) {
-						field_element.parent().addClass("hidden");
+						field_element.parents(".form-group").addClass("hidden");
 					} else {
-						console.log("Field", field_element);
-						console.log("Parent", field_element.parent());
-						field_element.parent().removeClass("hidden");
+						field_element.parents(".form-group").removeClass("hidden");
 					}
 				}
 			}

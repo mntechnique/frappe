@@ -212,25 +212,26 @@
 {% endmacro %}
 
 {% macro render_table(field) %}
-	{{ label(field) }}
-	<div class='web-form-grid'
-		data-fieldname='{{ field.fieldname }}' data-doctype='{{ field.options }}'>
-		<table class='table table-bordered'>
-			<thead>
-				{{ render_row(field) }}
-			</thead>
-			<tbody>
-				{{ render_row(field, {}, True) }}
-				{% if doc and doc.get(field.fieldname) %}
-					{% for d in doc.get(field.fieldname) %}
-						{{ render_row(field, d) }}
-					{% endfor %}
-				{% endif %}
-			</tbody>
-		</table>
+	<div data-fieldname='{{ field.fieldname }}' data-doctype='{{ field.options }}'>
+		{{ label(field) }}
+		<div class='web-form-grid'>
+			<table class='table table-bordered'>
+				<thead>
+					{{ render_row(field) }}
+				</thead>
+				<tbody>
+					{{ render_row(field, {}, True) }}
+					{% if doc and doc.get(field.fieldname) %}
+						{% for d in doc.get(field.fieldname) %}
+							{{ render_row(field, d) }}
+						{% endfor %}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+		<p><button class='btn btn-default btn-sm btn-add-row'
+			data-fieldname='{{ field.fieldname }}'>{{ _("Add Row") }}</button></p>
 	</div>
-	<p><button class='btn btn-default btn-sm btn-add-row'
-		data-fieldname='{{ field.fieldname }}'>{{ _("Add Row") }}</button></p>
 {% endmacro %}
 
 <!-- pagination -->

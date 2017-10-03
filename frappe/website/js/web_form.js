@@ -460,7 +460,7 @@ frappe.ready(function() {
 				var selector = "[data-fieldname='" + name +  "']";
 				var field_element = $(selector);
 
-				if (web_form_field.fieldtype == "Section Break") {
+				if (web_form_field.fieldtype == "Section Break" || web_form_field.fieldtype=="Table") {
 					if (depends_on_result == false) {
 						field_element.addClass("hidden");
 					} else {

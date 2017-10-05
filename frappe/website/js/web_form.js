@@ -454,23 +454,36 @@ frappe.ready(function() {
 
 		$.each(fields_with_depends_on, function(index, web_form_field) {
 			if (web_form_field) {
-				var depends_on_result = evaluate_depends_on(web_form_field.depends_on);
-				
-				var name = (web_form_field.fieldname || web_form_field.name);
-				var selector = "[data-fieldname='" + name +  "']";
-				var field_element = $(selector);
+				var show_field = evaluate_depends_on(web_form_field.depends_on);
 
-				if (web_form_field.fieldtype == "Section Break" || web_form_field.fieldtype=="Table") {
-					if (depends_on_result == false) {
-						field_element.addClass("hidden");
+				var fieldname = (web_form_field.fieldname || web_form_field.name);
+				
+				if (web_form_field.fieldtype == "Section Break") {
+					var section_break = $(".section[data-fieldname='" + fieldname +  "']");
+					if (show_field) {
+						section_break.removeClass("hidden");
 					} else {
-						field_element.removeClass("hidden");
+						section_break.addClass("hidden");
+					}
+				} else if  (web_form_field.fieldtype=="Table") {
+					var table_label = $("label[for='" + fieldname +  "']");
+					var table_div = $(".web-form-grid[data-fieldname='" + fieldname +  "']");
+					var add_row_button = $(".btn-add-row[data-fieldname='" + fieldname +  "']");
+					if (show_field) {
+						table_label.removeClass("hidden");
+						table_div.removeClass("hidden");
+						add_row_button.removeClass("hidden");
+					} else {
+						table_label.addClass("hidden");
+						table_div.addClass("hidden");
+						add_row_button.addClass("hidden");
 					}
 				} else {
-					if (depends_on_result == false) {
-						field_element.parents(".form-group").addClass("hidden");
+					var field = $("[data-fieldname='" + fieldname +  "']");
+					if (show_field) {
+						field.parents(".form-group").removeClass("hidden");
 					} else {
-						field_element.parents(".form-group").removeClass("hidden");
+						field.parents(".form-group").addClass("hidden");
 					}
 				}
 			}

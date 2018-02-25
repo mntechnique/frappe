@@ -25,7 +25,7 @@ def handle_incoming_call(*args, **kwargs):
 			comm.communication_type = "Communication"
 			comm.status = "Open"
 			comm.sent_or_received = "Received"
-			comm.content = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime()) + "<br>"+content
+			comm.content = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime()) + "<br>" + content
 			comm.communication_date = content.get("StartTime")
 			comm.sid = content.get("CallSid")
 			# identify and add exophone

@@ -179,8 +179,8 @@ frappe.ui.form.on("Communication", {
 					"To": frm.doc.phone_no,
 					"CallerId": frm.doc.exophone,
 					"StatusCallback": "http://dev.mntechnique.com/frappe.integrations.doctype.exotel_settings.exotel_settings.capture_call_details",
-					"reference_doctype": doc.reference_doctype,
-					"reference_name": doc.reference_name
+					"reference_doctype": frm.doc.reference_doctype,
+					"reference_name": frm.doc.reference_name
 				},
 				freeze: true,
 				freeze_message: __("Calling.."),

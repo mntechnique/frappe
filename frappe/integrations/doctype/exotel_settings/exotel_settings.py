@@ -45,6 +45,7 @@ def capture_call_details(*args, **kwargs):
 	try:
 		if args or kwargs:
 			credentials = frappe.get_doc("Exotel Settings")
+
 			content = args or kwargs
 			call_details = requests.get('https://{0}:{1}@api.exotel.com/v1/Accounts/{0}/Calls/{2}'.format(credentials.exotel_sid,credentials.exotel_token,content.get("CallSid")))
 

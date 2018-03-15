@@ -20,7 +20,6 @@ class ExotelSettings(Document):
 			frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
 
 def make_popup(caller_no):
-
 	contact_lookup = frappe.db.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
 	if len(contact_lookup) > 0:
 		contact_name = contact_lookup[0].get("name")
@@ -30,8 +29,7 @@ def make_popup(caller_no):
 			"title": "Customer", 
 			"number": caller_no,
 			"name": customer_full_name,
-			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S'),
-			# "call_id": call_id
+			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
 
 		popup_html = render_popup(popup_data)
@@ -45,8 +43,7 @@ def make_popup(caller_no):
 			"title": "Lead", 
 			"number": caller_no,
 			"name": lead_full_name,
-			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S'),
-			# "call_id": call_id
+			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 		}
 		popup_html = render_popup(popup_data)
 		return popup_html
@@ -55,8 +52,7 @@ def make_popup(caller_no):
 		"title": "Unknown Caller",
 		"number": caller_no,
 		"name": "Unknown",
-		"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S'),
-		# "call_id": call_id
+		"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
 	}
 	popup_html = render_popup(popup_data)
 	return popup_html
@@ -101,6 +97,8 @@ def handle_incoming_call(*args, **kwargs):
 			comm.communication_date = content.get("StartTime")
 			comm.sid = content.get("CallSid")
 			comm.exophone = content.get("CallTo")
+			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
+				display_popup()
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()

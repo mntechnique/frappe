@@ -61,7 +61,7 @@ def render_popup(popup_data):
 	html = frappe.render_template("frappe/public/js/popup.html", popup_data)
 	return html
 
-def display_popup():
+def display_popup(caller_no):
 	# agent_no = popup_json.get("destination")
 
 		try:
@@ -84,6 +84,9 @@ def handle_incoming_call(*args, **kwargs):
 		if args or kwargs:
 			content = args or kwargs
 
+			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
+				display_popup(content.get("CallFrom"))
+			
 			comm = frappe.new_doc("Communication")
 			comm.subject = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())
 			comm.send_email = 0
@@ -97,11 +100,10 @@ def handle_incoming_call(*args, **kwargs):
 			comm.communication_date = content.get("StartTime")
 			comm.sid = content.get("CallSid")
 			comm.exophone = content.get("CallTo")
-			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"))
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()
+			
 
 			return comm
 	except Exception as e:

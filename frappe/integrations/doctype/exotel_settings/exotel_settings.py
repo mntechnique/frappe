@@ -98,7 +98,7 @@ def handle_incoming_call(*args, **kwargs):
 			comm.sid = content.get("CallSid")
 			comm.exophone = content.get("CallTo")
 			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
-				display_popup()
+				display_popup(content.get("CallFrom"))
 
 			comm.save(ignore_permissions=True)
 			frappe.db.commit()

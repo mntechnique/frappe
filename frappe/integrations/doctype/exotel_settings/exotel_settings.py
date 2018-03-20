@@ -178,3 +178,17 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 			frappe.msgprint(_("Authenication error. Invalid exotel credentials."))
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for outgoing call")
+
+
+@frappe.whitelist(allow_guest=True)
+def test_method():
+	contacts = []
+	try:
+		contacts = frappe.get_all("Contact", fields=["*"])
+	except Exception as e:
+		return e.message
+
+	if len(contacts) > 0:
+		return "Contacts have been found"
+	else:
+		return "Contacts have not been found"

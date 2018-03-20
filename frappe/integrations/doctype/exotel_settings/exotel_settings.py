@@ -69,7 +69,16 @@ def handle_incoming_call(*args, **kwargs):
 		if args or kwargs:
 			content = args or kwargs
 			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"))
+				caller_no = content.get("CallFrom")
+
+				contact_lookup = frappe.db.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
+
+				if len(contact_lookup) > 0:
+					caller = contact_lookup[0].get("name")
+					frappe.async.publish_realtime(event="msgprint", message=caller)
+				else:
+					caller = "Unknown"
+					frappe.async.publish_realtime(event="msgprint", message=caller)
 			
 			comm = frappe.new_doc("Communication")
 			comm.subject = "Incoming Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())

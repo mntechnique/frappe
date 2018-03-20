@@ -20,7 +20,7 @@ class ExotelSettings(Document):
 			frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
 
 def make_popup(caller_no):
-	contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
+	contact_lookup = frappe.db.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
 
 	if len(contact_lookup) > 0:
 		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
@@ -84,9 +84,6 @@ def handle_incoming_call(*args, **kwargs):
 	try:
 		if args or kwargs:
 			content = args or kwargs
-			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
-				display_popup(content.get("CallFrom"))
-
 			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
 				display_popup(content.get("CallFrom"))
 			

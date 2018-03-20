@@ -20,7 +20,7 @@ class ExotelSettings(Document):
 			frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
 
 def make_popup(caller_no):
-	contact_lookup = frappe.db.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
+	contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
 
 	if len(contact_lookup) > 0:
 		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
@@ -59,7 +59,7 @@ def make_popup(caller_no):
 		return popup_html
 
 def render_popup(popup_data):
-	html = frappe.render_template("frappe/public/js/popup.html", popup_data)
+	html = frappe.render_template("frappe/public/js/integrations/call_popup.html", popup_data)
 	return html
 
 def display_popup(caller_no):
@@ -76,7 +76,7 @@ def display_popup(caller_no):
 			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)	
 
 	except Exception as e:
-		frappe.log_error(message=e, title="Error in popup display")
+		frappe.log_error(message=frappe.get_traceback(), title="Error in popup display")
 
 @frappe.whitelist(allow_guest=True)
 def handle_incoming_call(*args, **kwargs):
@@ -84,6 +84,8 @@ def handle_incoming_call(*args, **kwargs):
 	try:
 		if args or kwargs:
 			content = args or kwargs
+			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
+				display_popup(content.get("CallFrom"))
 
 			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
 				display_popup(content.get("CallFrom"))
@@ -108,7 +110,7 @@ def handle_incoming_call(*args, **kwargs):
 
 			return comm
 	except Exception as e:
-		frappe.log_error(message=e, title="Error log for incoming call")
+		frappe.log_error(message=frappe.get_traceback(), title="Error log for incoming call")
 
 @frappe.whitelist(allow_guest=True)
 def capture_call_details(*args, **kwargs):
@@ -134,7 +136,7 @@ def capture_call_details(*args, **kwargs):
 			else:
 				frappe.msgprint(_("Authenication error. Invalid exotel credentials."))	
 	except Exception as e:
-		frappe.log_error(message=e, title="Error in capturing call details")
+		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
 
 @frappe.whitelist()
 def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
@@ -194,4 +196,4 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 		else:
 			frappe.msgprint(_("Authenication error. Invalid exotel credentials."))
 	except Exception as e:
-		frappe.log_error(message=e, title="Error log for outgoing call")
+		frappe.log_error(message=frappe.get_traceback(), title="Error log for outgoing call")

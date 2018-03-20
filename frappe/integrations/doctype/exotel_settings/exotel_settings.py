@@ -190,10 +190,13 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 
 
 @frappe.whitelist(allow_guest=True)
-def test_method():
+def test_method(*args, **kwargs):
 	contacts = []
 	try:
-		contacts = frappe.get_all("Contact", fields=["*"])
+		if args or kwargs:
+			contacts = frappe.get_all("Contact", fields=["*"])
+		else:
+			return "No args or kwargs"
 	except Exception as e:
 		return e.message
 

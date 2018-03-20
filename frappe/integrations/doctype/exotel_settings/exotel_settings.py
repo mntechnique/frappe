@@ -71,7 +71,7 @@ def handle_incoming_call(*args, **kwargs):
 			if(frappe.get_doc("Telephony Settings").show_popup_for_incoming_calls):
 				caller_no = content.get("CallFrom")
 
-				contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
+				contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no}, ignore_permissions=True)
 
 				if len(contact_lookup) > 0:
 					caller = contact_lookup[0].get("name")

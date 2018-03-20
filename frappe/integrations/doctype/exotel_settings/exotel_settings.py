@@ -22,56 +22,40 @@ class ExotelSettings(Document):
 def make_popup(caller_no):
 	contact_lookup = frappe.db.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
 
+	popup_html = """<h4 class="text-muted">No data</h4>"""
+
 	if len(contact_lookup) > 0:
 		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
 		if(contact_doc.get_link_for('Customer')):		
 			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
 			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
-			popup_data = {
-				"title": "Customer", 
-				"number": caller_no,
-				"name": customer_full_name,
-				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
-			}
-
-			popup_html = render_popup(popup_data)
-			return popup_html
-
+			popup_html = render_popup("Customer", caller_no, customer_full_name)
+			
 		elif(contact_doc.get_link_for('Lead')):
 			lead_full_name = frappe.get_doc("Lead",contact_doc.get_link_for('Lead')).lead_name
-			popup_data = {
-				"title": "Lead", 
-				"number": caller_no,
-				"name": lead_full_name,
-				"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
-			}
-			popup_html = render_popup(popup_data)
-			return popup_html
+			popup_html = render_popup("Lead", caller_no, lead_full_name)
 
 	else:
-		popup_data = {
-			"title": "Unknown Caller",
-			"number": caller_no,
-			"name": "Unknown",
-			"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
-		}
-		popup_html = render_popup(popup_data)
-		return popup_html
+		popup_html = render_popup("Unknown Caller", caller_no, "Unknown")
 
-def render_popup(popup_data):
+	return popup_html
+
+def render_popup(title, number, name):
+	popup_data = {
+		"title": title,
+		"number": number,
+		"name": name,
+		"call_timestamp": frappe.utils.datetime.datetime.strftime(frappe.utils.datetime.datetime.today(), '%d/%m/%Y %H:%M:%S')
+	}
 	html = frappe.render_template("frappe/public/js/integrations/call_popup.html", popup_data)
 	return html
 
 def display_popup(caller_no):
-	# agent_no = popup_json.get("destination")
-
 	try:
 		popup_html = make_popup(caller_no)
-		# if agent_id:	
-		# 	frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent_id)
-		# else:
 		users = frappe.get_all("Has Role", filters={"parenttype":"User","role":"Support Team"}, fields=["parent"])
 		agents = [user.get("parent") for user in users]
+		agents = list(set(agents))
 		for agent in agents:
 			frappe.async.publish_realtime(event="msgprint", message=popup_html, user=agent)	
 

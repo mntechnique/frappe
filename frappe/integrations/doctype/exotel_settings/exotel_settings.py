@@ -20,11 +20,11 @@ class ExotelSettings(Document):
 			frappe.throw(_("Invalid credentials. Please try again with valid credentials"))
 
 def make_popup(caller_no):
-	contact_lookup = frappe.db.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no})
+	contact_lookup = frappe.get_list("Contact", or_filters={"phone":caller_no, "mobile_no":caller_no}, ignore_permissions=True)
 
 	if len(contact_lookup) > 0:
 		contact_doc = frappe.get_doc("Contact", contact_lookup[0].get("name"))
-		if(contact_doc.get_link_for('Customer')):		
+		if(contact_doc.get_link_for('Customer')):
 			customer_name = frappe.db.get_value("Dynamic Link", {"parent":contact_doc.get("name")}, "link_name")
 			customer_full_name = frappe.db.get_value("Customer", customer_name, "customer_name")
 			popup_data = {
@@ -121,7 +121,7 @@ def capture_call_details(*args, **kwargs):
 			response = requests.get('https://api.exotel.com/v1/Accounts/{sid}/Calls/{callsid}.json'.format(sid = credentials.exotel_sid,callsid = content.get("CallSid")),\
 				auth=(credentials.exotel_sid,credentials.exotel_token))
 
-			content = response.json()["Call"]
+			content = (response.json())["Call"]
 
 			if response.status_code == 200:
 				call = frappe.get_all("Communication", filters={"sid":content.get("CallSid")}, fields=["name"])
@@ -131,7 +131,8 @@ def capture_call_details(*args, **kwargs):
 				frappe.db.commit()
 				return comm
 			else:
-				frappe.msgprint(_("Authenication error. Invalid exotel credentials."))	
+				frappe.msgprint(_("Authenication error. Invalid exotel credentials."))
+				frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error in capturing call details")
 
@@ -168,7 +169,7 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 		})
 
 		if response.status_code == 200:
-			content = response.json()["Call"]
+			content = (response.json())["Call"]
 
 			comm = frappe.new_doc("Communication")
 			comm.subject = "Outgoing Call " + frappe.utils.get_datetime_str(frappe.utils.get_datetime())
@@ -192,5 +193,6 @@ def handle_outgoing_call(To, CallerId,reference_doctype,reference_name):
 			return comm
 		else:
 			frappe.msgprint(_("Authenication error. Invalid exotel credentials."))
+			frappe.log_error(message=frappe.get_traceback(), title="Error in outgoing call")
 	except Exception as e:
 		frappe.log_error(message=frappe.get_traceback(), title="Error log for outgoing call")
